@@ -1,4 +1,2 @@
 # Bitbirdtool-Financial-Systen
 
-
-
