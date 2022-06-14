@@ -2,7 +2,6 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@solmate/src/utils/FixedPointMathLib.sol";
-//import "@rari-capital/solmate/utils/FixedPointMathLib.sol";
 
 error AllocationCannotBeZero();
 error AlreadyDeposited();
@@ -15,87 +14,52 @@ error OnlyPartnersWithBalance();
 error PartnerAlreadyFunded();
 error BeforeCliff();
 
-/// @title Strategic Partnership
-/// @author Austin Green
-/// @notice Create a Strategic Partnership.
 contract Partnership {
     using FixedPointMathLib for uint256;
 
-    /*///////////////////////////////////////////////////////////////
-                               EVENTS
-    //////////////////////////////////////////////////////////////*/
 
     event Deposited(address indexed depositor, uint256 depositTokenAmount);
     event PartnershipFormed(address indexed partner, uint256 exchangeTokenAmount);
     event FundingReceived(address indexed depositor, uint256 exchangeTokenAmount, uint256 depositTokenAmount);
     event DepositTokenClaimed(address indexed partner, uint256 depositTokenAmount);
 
-    /*///////////////////////////////////////////////////////////////
-                               IMMUTABLES
-    //////////////////////////////////////////////////////////////*/
-
-    /// @notice The depositor deposits this token.
     ERC20 public immutable depositToken;
 
-    /// @notice Partners enter partnerships by providing this token for a claim on depositTokens.
+ 
     ERC20 public immutable exchangeToken;
 
-    /// @notice The length of time in which partners can enter partnerships.
+
     uint256 public immutable partnerPeriod;
 
-    /// @notice The length of time between partnershipStartedAt and the vesting cliff.
     uint256 public immutable cliffPeriod;
 
-    /// @notice The length of time between the vesting cliff and end of vesting.
+ 
     uint256 public immutable vestingPeriod;
 
-    /// @notice Number of exchangeTokens required for 1 depositToken.
-    /// @dev A fixed point number multiplied by 100 to avoid decimals (for example 20 is 20_00).
-    uint256 public immutable exchangeRate;
 
-    /// @notice The entity depositing the depositToken.
+
     address public immutable depositor;
 
-    /// @notice Sum of depositTokens allocated to partners.
+ 
     uint256 public immutable totalAllocated;
 
-    /// @notice Base unit for fixed point math. Accounts for difference in decimals between deposit and exchange tokens.
     uint256 public immutable BASE_UNIT;
 
-    /*///////////////////////////////////////////////////////////////
-                               STORAGE
-    //////////////////////////////////////////////////////////////*/
 
-    /// @notice A partner's exchange token allocation.
     mapping(address => uint256) public partnerExchangeAllocations;
 
-    /// @notice A partner's remaing balance of allocated but not claimed depositTokens.
+
     mapping(address => uint256) public partnerBalances;
 
-    /// @notice Initially set at partnershipStartedAt and is updated every time partner successfully claims.
+
     mapping(address => uint256) public lastWithdrawnAt;
 
-    /// @notice When the partnership begins. Equal to the time of deposit + partnerPeriod.
+
     uint256 public partnershipStartedAt;
 
-    /// @notice Sum of exchangeTokens sent during partnerPeriod.
+
     uint256 public totalExchanged;
 
-    /*///////////////////////////////////////////////////////////////
-                              CONSTRUCTOR
-    //////////////////////////////////////////////////////////////*/
-
-    /// @notice Creates a new Strategic Partnership contract.
-    /// @param _depositToken The token that is being exchanged.
-    /// @param _exchangeToken The token partners exchange for the depositToken.
-    /// @param _exchangeRate Number of exchangeTokens required for 1 depositToken
-    /// @param _partnerPeriod The length of time in which partners can enter partnerships.
-    /// @param _cliffPeriod The length of time between partnershipStartedAt and the vesting cliff.
-    /// @param _vestingPeriod The length of time between the vesting cliff and end of vesting.
-    /// @param _partners Addresses approved for strategic partnerships.
-    /// @param _allocations Number of exchangeTokens allocated to each partner.
-    /// @param _depositor Address that will be depositing the native token.
-    /// @dev Partners and amounts are matched by index
     constructor(
         ERC20 _depositToken,
         ERC20 _exchangeToken,
@@ -111,25 +75,23 @@ contract Partnership {
 
         depositToken = _depositToken;
         exchangeToken = _exchangeToken;
-        exchangeRate = _exchangeRate;
+        //exchangeRate = _exchangeRate;
         partnerPeriod = _partnerPeriod;
         cliffPeriod = _cliffPeriod;
         vestingPeriod = _vestingPeriod;
         depositor = _depositor;
 
-        // Used to calculate the base unit for fixed point math
-        // Needed because native and funding tokens could have different decimals
+ 
         unchecked {
             uint256 z = depositToken.decimals() - exchangeToken.decimals();
             if (z > depositToken.decimals()) {
                 z = exchangeToken.decimals() - depositToken.decimals();
             }
 
-            // add 2 to properly account for exchangeRate decimals
             BASE_UNIT = 10**(z + 2);
         }
 
-        // Assign totalAllocated and partnerExchangeAllocations
+      
         uint256 sum = 0;
         uint256 length = _partners.length;
         for (uint256 i = 0; i < length; i++) {
@@ -141,10 +103,6 @@ contract Partnership {
         totalAllocated = exchangeToDeposit(sum);
     }
 
-    /*///////////////////////////////////////////////////////////////
-                              MODIFIERS
-    //////////////////////////////////////////////////////////////*/
-
     modifier onlyDepositor() {
         if (msg.sender != depositor) revert OnlyDepositor();
         _;
@@ -155,9 +113,6 @@ contract Partnership {
         _;
     }
 
-    /*///////////////////////////////////////////////////////////////
-                           VIEW FUNCTIONS
-    //////////////////////////////////////////////////////////////*/
 
     function exchangeToDeposit(uint256 _exchangeTokens) private view returns (uint256) {
         return 0;
@@ -184,12 +139,7 @@ contract Partnership {
         return _getClaimableTokens(_partner);
     }
 
-    /*///////////////////////////////////////////////////////////////
-                              FUNCTIONS
-    //////////////////////////////////////////////////////////////*/
 
-    /// @notice Depositor calls this function to deposit native tokens and begin the funding period. Can only be called once.
-    /// @dev Assumes depositor has called approve on the depositToken with this contract's address and depositAmount.
     function deposit() external onlyDepositor {
         if (partnershipStartedAt != 0) revert AlreadyDeposited();
 
@@ -199,8 +149,6 @@ contract Partnership {
         emit Deposited(msg.sender, totalAllocated);
     }
 
-    /// @notice For partners to provide their allocated amount of the exchangeToken between when the deposit is made and partnershipStartedAt.
-    /// @dev Assumes partner has called approve on the exchangeToken with this contract's address and their allocation amount.
     function enterPartnership() external onlyPartners {
         if (block.timestamp >= partnershipStartedAt) revert PartnerPeriodEnded();
         if (partnerBalances[msg.sender] != 0) revert PartnerAlreadyFunded();
@@ -215,7 +163,6 @@ contract Partnership {
         emit PartnershipFormed(msg.sender, fundingAmount);
     }
 
-    /// @notice Sends unallocated depositTokens and all exchangeTokens to the depositor.
     function claimExchangeTokens() external {
         if (block.timestamp < partnershipStartedAt) revert PartnershipNotStarted();
 
@@ -230,7 +177,6 @@ contract Partnership {
         emit FundingReceived(depositor, amount, unfundedAmount);
     }
 
-    /// @notice For partners to claim vested depositTokens
     function claimDepositTokens() external onlyPartners {
         uint256 cliffAt = partnershipStartedAt + cliffPeriod;
         if (block.timestamp < cliffAt) revert BeforeCliff();
