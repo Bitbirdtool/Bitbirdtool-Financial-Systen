@@ -162,8 +162,10 @@ contract Partnership {
 
         emit PartnershipFormed(msg.sender, fundingAmount);
     }
+    
 
     function claimExchangeTokens() external {
+    
         if (block.timestamp < partnershipStartedAt) revert PartnershipNotStarted();
 
         uint256 amount = exchangeToken.balanceOf(address(this));
