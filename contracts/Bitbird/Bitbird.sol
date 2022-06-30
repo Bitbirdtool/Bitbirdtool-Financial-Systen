@@ -48,15 +48,11 @@ contract Partnership {
 
     mapping(address => uint256) public partnerExchangeAllocations;
 
-
     mapping(address => uint256) public partnerBalances;
-
 
     mapping(address => uint256) public lastWithdrawnAt;
 
-
     uint256 public partnershipStartedAt;
-
 
     uint256 public totalExchanged;
 
