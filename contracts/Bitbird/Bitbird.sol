@@ -22,27 +22,20 @@ contract Partnership {
     event DepositTokenClaimed(address indexed partner, uint256 depositTokenAmount);
 
     ERC20 public immutable depositToken;
-
  
     ERC20 public immutable exchangeToken;
-
 
     uint256 public immutable partnerPeriod;
 
     uint256 public immutable cliffPeriod;
-
  
     uint256 public immutable vestingPeriod;
 
-
-
     address public immutable depositor;
-
  
     uint256 public immutable totalAllocated;
 
     uint256 public immutable BASE_UNIT;
-
 
     mapping(address => uint256) public partnerExchangeAllocations;
 
