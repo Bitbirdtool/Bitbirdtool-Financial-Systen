@@ -16,8 +16,6 @@ error BeforeCliff();
 
 contract Partnership {
     using FixedPointMathLib for uint256;
-
-
     event Deposited(address indexed depositor, uint256 depositTokenAmount);
     event PartnershipFormed(address indexed partner, uint256 exchangeTokenAmount);
     event FundingReceived(address indexed depositor, uint256 exchangeTokenAmount, uint256 depositTokenAmount);
