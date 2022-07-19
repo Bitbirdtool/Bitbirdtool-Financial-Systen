@@ -58,7 +58,6 @@ contract Partnership {
         uint256[] memory _allocations,
         address _depositor
     ) {
-    
         require(_partners.length == _allocations.length, "Partners and allocations must have same length");
 
         depositToken = _depositToken;
