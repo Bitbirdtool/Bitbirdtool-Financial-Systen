@@ -67,7 +67,6 @@ contract Partnership {
         cliffPeriod = _cliffPeriod;
         vestingPeriod = _vestingPeriod;
         depositor = _depositor;
-
  
         unchecked {
             uint256 z = depositToken.decimals() - exchangeToken.decimals();
