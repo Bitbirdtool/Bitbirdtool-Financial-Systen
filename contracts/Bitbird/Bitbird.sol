@@ -76,7 +76,6 @@ contract Partnership {
 
             BASE_UNIT = 10**(z + 2);
         }
-
       
         uint256 sum = 0;
         uint256 length = _partners.length;
