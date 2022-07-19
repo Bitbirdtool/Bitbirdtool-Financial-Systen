@@ -46,7 +46,7 @@ contract Partnership {
     uint256 public partnershipStartedAt;
 
     uint256 public totalExchanged;
-
+    
     constructor(
         ERC20 _depositToken,
         ERC20 _exchangeToken,
