@@ -176,4 +176,5 @@ contract Partnership {
 
         emit DepositTokenClaimed(msg.sender, amountClaimable);
     }
+    
 }
