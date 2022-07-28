@@ -13,6 +13,7 @@ error OnlyPartnersWithBalance();
 error PartnerAlreadyFunded();
 error BeforeCliff();
 
+
 contract Partnership {
     using FixedPointMathLib for uint256;
     event Deposited(address indexed depositor, uint256 depositTokenAmount);
